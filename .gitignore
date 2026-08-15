@@ -1,0 +1,23 @@
+# Arduino build artifacts
+build/
+*.bin
+*.elf
+*.hex
+
+# Arduino CLI cache
+.cache/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+*.code-workspace
+.idea/
+
+# IMPORTANT: config.h berisi credentials (WIFI_SSID, WIFI_PASSWORD, API_KEY)
+# Untuk production, pertimbangkan:
+#   1. Buat config.h.example sebagai template
+#   2. Tambahkan baris berikut (uncomment) untuk gitignore config.h:
+#   MesinKasirPesantren/config.h

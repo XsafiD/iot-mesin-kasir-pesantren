@@ -7,6 +7,7 @@
 #include "feedback.h"
 #include "wifi_manager.h"
 #include "api_client.h"
+#include <time.h>
 
 static TxState state = TxState::IDLE;
 static unsigned long stateEnteredAt = 0;
@@ -18,6 +19,7 @@ static TransactionResult lastResult;
 
 static unsigned long lastHeartbeat = 0;
 static unsigned int  txnCounterToday = 0;
+static int           lastTxnDay = -1;  // Untuk reset counter harian via NTP
 
 static unsigned long lastBlink = 0;
 static bool          blinkOn = true;
@@ -37,10 +39,13 @@ static bool stateTimedOut(unsigned long timeoutMs) {
 
 static void handleIdle() {
     char key = keypadGetKey();
-    if (key >= '0' && key <= '9') {
+    if (key >= '1' && key <= '9') {  // Cegah '0' sebagai digit pertama (Rp 0 stuck)
         nominalBuffer = String(key);
         currentNominal = key - '0';
         changeState(TxState::INPUT_NOMINAL);
+        blinkOn = true;
+        lastBlink = millis();
+        displayShowInput(currentNominal, blinkOn);
     }
 }
 
@@ -51,22 +56,28 @@ static void handleInputNominal() {
             if (nominalBuffer.length() < MAX_NOMINAL_DIGITS) {
                 nominalBuffer += key;
                 currentNominal = nominalBuffer.toInt();
+                blinkOn = true;
+                lastBlink = millis();
+                displayShowInput(currentNominal, blinkOn);
             }
         } else if (key == '#') {
             if (currentNominal > 0) {
+                rfidReset();
                 // Tampilkan layar "Tap kartu" SAAT masuk state WAIT_RFID.
                 // Tanpa ini, LCD tetap menampilkan layar "Input Nominal"
                 // dari state sebelumnya (handleWaitRfid() tidak me-refresh display).
                 displayShowWaitRFID(currentNominal);
                 changeState(TxState::WAIT_RFID);
                 return;  // cegah blok blink-update di bawah menimpa layar baru
+            } else {
+                feedbackBeepError();  // Nominal kosong, kasih feedback ke user
             }
         } else if (key == '*') {
             nominalBuffer = "";
             currentNominal = 0;
             displayShowIdle();
             changeState(TxState::IDLE);
-            return;
+            return;  // Cegah blink menimpa display
         }
     }
 
@@ -146,7 +157,8 @@ static void handleProcessing() {
 }
 
 static void handleShowSuccess() {
-    if (stateTimedOut(RESULT_DISPLAY_MS)) {
+    char key = keypadGetKey();
+    if (key == '#' || stateTimedOut(RESULT_DISPLAY_MS)) {  // Skip dengan # atau auto 3s
         nominalBuffer = "";
         currentNominal = 0;
         displayShowIdle();
@@ -156,7 +168,8 @@ static void handleShowSuccess() {
 }
 
 static void handleShowError() {
-    if (stateTimedOut(RESULT_DISPLAY_MS)) {
+    char key = keypadGetKey();
+    if (key == '#' || stateTimedOut(RESULT_DISPLAY_MS)) {  // Skip dengan # atau auto 3s
         nominalBuffer = "";
         currentNominal = 0;
         displayShowIdle();
@@ -181,6 +194,8 @@ void fsmInit() {
     nominalBuffer = "";
     currentNominal = 0;
     txnCounterToday = 0;
+    lastTxnDay = -1;
+    lastHeartbeat = 0;
     displayShowIdle();
 }
 
@@ -188,7 +203,23 @@ void fsmTick() {
     feedbackUpdate();
     wifiLoop();
 
-    if (wifiIsConnected() && millis() - lastHeartbeat >= HEARTBEAT_INTERVAL_MS) {
+    // Reset counter transaksi harian via NTP (deteksi ganti hari)
+    if (wifiIsConnected()) {
+        time_t now = time(nullptr);
+        if (now > (time_t)NTP_MIN_VALID_TIME) {
+            struct tm timeinfo;
+            localtime_r(&now, &timeinfo);
+            if (lastTxnDay != -1 && timeinfo.tm_mday != lastTxnDay) {
+                txnCounterToday = 0;
+                Serial.println(F("[FSM] Hari berganti, reset txn counter harian"));
+            }
+            lastTxnDay = timeinfo.tm_mday;
+        }
+    }
+
+    // Heartbeat hanya saat IDLE agar tidak mengganggu responsivitas keypad
+    if (state == TxState::IDLE && wifiIsConnected() &&
+        millis() - lastHeartbeat >= HEARTBEAT_INTERVAL_MS) {
         lastHeartbeat = millis();
         Serial.println(F("[FSM] Sending heartbeat..."));
         apiSendHeartbeat(millis() / 1000, wifiGetRssi(), ESP.getFreeHeap(), txnCounterToday);

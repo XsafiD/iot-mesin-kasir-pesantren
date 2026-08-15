@@ -11,6 +11,7 @@
  */
 
 #include <Arduino.h>
+#include <esp_task_wdt.h>
 #include "config.h"
 #include "types.h"
 #include "display.h"
@@ -24,6 +25,11 @@
 void setup() {
     Serial.begin(115200);
     delay(200);
+
+    // Watchdog timer (30 detik) — reset otomatis kalau firmware hang
+    esp_task_wdt_init(30, true);
+    esp_task_wdt_add(NULL);
+
     Serial.println();
     Serial.println(F("================================"));
     Serial.println(F(" Mesin Kasir Pesantren v1.0.0"));
@@ -81,5 +87,6 @@ void setup() {
 }
 
 void loop() {
+    esp_task_wdt_reset();
     fsmTick();
 }

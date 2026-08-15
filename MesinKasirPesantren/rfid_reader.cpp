@@ -31,3 +31,8 @@ void rfidHalt() {
     mfrc522.PICC_HaltA();
     mfrc522.PCD_StopCrypto1();
 }
+
+void rfidReset() {
+    rfidHalt();
+    mfrc522.PCD_Init();
+}
