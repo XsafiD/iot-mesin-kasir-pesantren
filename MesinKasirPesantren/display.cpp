@@ -68,8 +68,7 @@ void displayShowIdle() {
 }
 
 void displayShowInput(unsigned long nominal, bool blink) {
-    lcd.clear();
-    lcd.setCursor(0, 0); lcd.print("Input Nominal:        ");
+    lcd.setCursor(0, 0); lcd.print(padRight("Input Nominal:"));
     lcd.setCursor(0, 1);
     if (blink) {
         String rupiah = formatRupiah(nominal);
@@ -111,7 +110,7 @@ void displayShowError(const String& title, const String& detail) {
     lcd.setCursor(0, 0); lcd.print(padCenter("! GAGAL !"));
     lcd.setCursor(0, 1); lcd.print(padCenter(truncate(title)));
     lcd.setCursor(0, 2); lcd.print(padCenter(truncate(detail)));
-    lcd.setCursor(0, 3); lcd.print(padCenter("Tekan # untuk ulang"));
+    lcd.setCursor(0, 3); lcd.print(padCenter("# = lanjut / auto 3s"));
 }
 
 void displayShowOffline() {
