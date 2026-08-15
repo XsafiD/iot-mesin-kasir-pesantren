@@ -63,9 +63,12 @@ static void handleInputNominal() {
         } else if (key == '#') {
             if (currentNominal > 0) {
                 rfidReset();
-                changeState(TxState::WAIT_RFID);
+                // Tampilkan layar "Tap kartu" SAAT masuk state WAIT_RFID.
+                // Tanpa ini, LCD tetap menampilkan layar "Input Nominal"
+                // dari state sebelumnya (handleWaitRfid() tidak me-refresh display).
                 displayShowWaitRFID(currentNominal);
-                return;  // Cegah blink menimpa display
+                changeState(TxState::WAIT_RFID);
+                return;  // cegah blok blink-update di bawah menimpa layar baru
             } else {
                 feedbackBeepError();  // Nominal kosong, kasih feedback ke user
             }

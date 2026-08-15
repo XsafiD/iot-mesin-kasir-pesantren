@@ -83,7 +83,7 @@ void displayShowInput(unsigned long nominal, bool blink) {
 
 void displayShowWaitRFID(unsigned long nominal) {
     lcd.clear();
-    lcd.setCursor(0, 0); lcd.print(padRight(formatRupiah(nominal)));
+    lcd.setCursor(0, 0); lcd.print(padRight("Total: " +formatRupiah(nominal)));
     lcd.setCursor(0, 1); lcd.print("                    ");  // 20 spaces
     lcd.setCursor(0, 2); lcd.print(padCenter("Tap kartu siswa"));
     lcd.setCursor(0, 3); lcd.print(padCenter("* = Batal"));
