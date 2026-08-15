@@ -61,9 +61,9 @@ void displayClear() {
 
 void displayShowIdle() {
     lcd.clear();
-    lcd.setCursor(0, 0); lcd.print("=== KASIR PESANTREN ===");
+    lcd.setCursor(0, 0); lcd.print(padCenter("= KASIR PESANTREN ="));
     lcd.setCursor(0, 1); lcd.print(padCenter("Sistem Siap"));
-    lcd.setCursor(0, 2); lcd.print(padCenter("Input nominal belanja"));
+    lcd.setCursor(0, 2); lcd.print(padCenter("Input total Belanja"));
     lcd.setCursor(0, 3); lcd.print(padCenter("Tekan # untuk lanjut"));
 }
 
@@ -84,7 +84,7 @@ void displayShowInput(unsigned long nominal, bool blink) {
 
 void displayShowWaitRFID(unsigned long nominal) {
     lcd.clear();
-    lcd.setCursor(0, 0); lcd.print(padRight("Total: " +formatRupiah(nominal)));
+    lcd.setCursor(0, 0); lcd.print(padRight("Total: " + formatRupiah(nominal)));
     lcd.setCursor(0, 1); lcd.print("                    ");  // 20 spaces
     lcd.setCursor(0, 2); lcd.print(padCenter("Tap kartu siswa"));
     lcd.setCursor(0, 3); lcd.print(padCenter("* = Batal"));
