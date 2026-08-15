@@ -3,6 +3,7 @@
 #include <WiFi.h>
 #include <HTTPClient.h>
 #include <ArduinoJson.h>
+#include <time.h>
 
 static String buildTransactionBody(const String& cardUid, unsigned long amount, const String& clientTxnId) {
     JsonDocument doc;
@@ -10,7 +11,9 @@ static String buildTransactionBody(const String& cardUid, unsigned long amount, 
     doc["amount"]         = (long)amount;
     doc["device_id"]      = DEVICE_ID;
     doc["client_txn_id"]  = clientTxnId;
-    doc["timestamp"]      = (long)time(nullptr);
+    // Guard: jika NTP belum sync (time < 2023), pakai millis() sebagai fallback
+    time_t now = time(nullptr);
+    doc["timestamp"]      = (now > NTP_MIN_VALID_TIME) ? (long)now : (long)(millis() / 1000);
 
     String body;
     serializeJson(doc, body);
@@ -20,7 +23,12 @@ static String buildTransactionBody(const String& cardUid, unsigned long amount, 
 static String makeClientTxnId() {
     static unsigned int counter = 0;
     counter++;
-    return String(DEVICE_ID) + "-" + String(millis()) + "-" + String(counter);
+    // Tambah MAC + timestamp NTP agar unik setelah reboot (cegah collision)
+    uint64_t mac = ESP.getEfuseMac();
+    time_t now = time(nullptr);
+    long ts = (now > NTP_MIN_VALID_TIME) ? (long)now : (long)millis();
+    return String(DEVICE_ID) + "-" + String(ts) + "-" +
+           String((uint32_t)(mac & 0xFFFFFF), HEX) + "-" + String(counter);
 }
 
 static TransactionResult parseResponse(int httpCode, const String& body) {

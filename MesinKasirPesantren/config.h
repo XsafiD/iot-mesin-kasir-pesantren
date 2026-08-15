@@ -12,7 +12,9 @@
 // =====================================================
 // API SERVER CONFIG
 // =====================================================
-#define API_BASE_URL        "http://127.0.0.1:8080"
+// ⚠️ GANTI ke IP server backend yang sebenarnya!
+// "127.0.0.1" = ESP32 sendiri, semua request PASTI GAGAL!
+#define API_BASE_URL        "http://192.168.1.100:8080"
 #define API_KEY             "kasir-pesantren-secret-key-2026"
 #define DEVICE_ID           "KASIR-PESANTREN-01"
 #define API_TIMEOUT_MS      5000
@@ -36,7 +38,7 @@
 
 // RFID MFRC522 (SPI)
 #define RFID_SS             5
-#define RFID_RST            4
+#define RFID_RST            16   // ⚠️ Pindah dari GPIO 4 (conflict KP_C1) → GPIO 16
 // SPI default: SCK=18, MISO=19, MOSI=23
 
 // Keypad 4x4 (TRANSPOSE LAYOUT - KEYPAD UNLABELED)
@@ -55,7 +57,7 @@
 // Feedback
 #define BUZZER_PIN          15
 #define LED_GREEN_PIN       2    // Built-in LED
-#define LED_RED_PIN         33
+#define LED_RED_PIN         17   // ⚠️ Pindah dari GPIO 33 (conflict KP_C3) → GPIO 17
 
 // =====================================================
 // BEHAVIORAL CONSTANTS
@@ -68,6 +70,14 @@
 #define BUZZER_SUCCESS_MS     150
 #define BUZZER_ERROR_MS       800
 #define HEARTBEAT_INTERVAL_MS 60000  // 1 minute
+
+// =====================================================
+// NTP TIME SYNC CONFIG
+// =====================================================
+#define NTP_SERVER_1        "pool.ntp.org"
+#define NTP_SERVER_2        "time.nist.gov"
+#define NTP_TZ_OFFSET_SEC   (7 * 3600)   // WIB = GMT+7
+#define NTP_MIN_VALID_TIME  1700000000UL  // Epoch ~Nov 2023 (guard sebelum sync)
 
 // =====================================================
 // FIRMWARE VERSION

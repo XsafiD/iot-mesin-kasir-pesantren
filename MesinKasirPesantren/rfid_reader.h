@@ -7,5 +7,6 @@
 void rfidInit();
 bool rfidCheckCard(String& outUid);
 void rfidHalt();
+void rfidReset();
 
 #endif // RFID_READER_H
