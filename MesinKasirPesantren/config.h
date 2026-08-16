@@ -14,7 +14,7 @@
 // =====================================================
 // ⚠️ GANTI ke IP server backend yang sebenarnya!
 // "127.0.0.1" = ESP32 sendiri, semua request PASTI GAGAL!
-#define API_BASE_URL        "http://192.168.1.100:8080"
+#define API_BASE_URL        "http://40.40.40.41:8080"
 #define API_KEY             "kasir-pesantren-secret-key-2026"
 #define DEVICE_ID           "KASIR-PESANTREN-01"
 #define API_TIMEOUT_MS      5000
