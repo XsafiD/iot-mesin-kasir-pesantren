@@ -27,7 +27,13 @@ void setup() {
     delay(200);
 
     // Watchdog timer (30 detik) — reset otomatis kalau firmware hang
-    esp_task_wdt_init(30, true);
+    // API core 3.x: pakai config struct (lama: esp_task_wdt_init(30, true))
+    esp_task_wdt_config_t wdt_config = {
+        .timeout_ms = 30000,
+        .idle_core_mask = 0,
+        .trigger_panic = true,
+    };
+    esp_task_wdt_reconfigure(&wdt_config);
     esp_task_wdt_add(NULL);
 
     Serial.println();

@@ -38,7 +38,7 @@
 
 // RFID MFRC522 (SPI)
 #define RFID_SS             5
-#define RFID_RST            16   // ⚠️ Pindah dari GPIO 4 (conflict KP_C1) → GPIO 16
+#define RFID_RST            2    // ⚠️ Fisik di D2 (wiring teruji 2026-08-15). Lib v2 tidak memakai RST, define ini dokumentasi saja
 // SPI default: SCK=18, MISO=19, MOSI=23
 
 // Keypad 4x4 (TRANSPOSE LAYOUT - KEYPAD UNLABELED)
@@ -56,7 +56,7 @@
 
 // Feedback
 #define BUZZER_PIN          15
-#define LED_GREEN_PIN       2    // Built-in LED
+#define LED_GREEN_PIN       16   // ⚠️ Pindah dari GPIO 2 (conflict RFID RST di D2) → GPIO 16. Kabel LED hijau pindah ke kolom D16
 #define LED_RED_PIN         17   // ⚠️ Pindah dari GPIO 33 (conflict KP_C3) → GPIO 17
 
 // =====================================================
